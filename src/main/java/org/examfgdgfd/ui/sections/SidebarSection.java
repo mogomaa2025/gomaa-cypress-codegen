@@ -73,9 +73,12 @@ public class SidebarSection extends JPanel {
         // Browse button handler
         btnBrowse.addActionListener(e -> {
             JFileChooser fc = new JFileChooser();
+            fc.setCurrentDirectory(new File(PreferenceManager.getLastOpenedDirectory()));
             fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                pathInput.setText(fc.getSelectedFile().getAbsolutePath());
+                String selectedPath = fc.getSelectedFile().getAbsolutePath();
+                pathInput.setText(selectedPath);
+                PreferenceManager.setLastOpenedDirectory(selectedPath);
             }
         });
     }

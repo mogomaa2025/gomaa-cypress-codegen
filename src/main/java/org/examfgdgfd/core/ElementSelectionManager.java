@@ -55,6 +55,8 @@ public class ElementSelectionManager {
                 new ActionDialog.ActionOption("[HOVER]", "Hover", "Hover over the element"),
                 new ActionDialog.ActionOption("[SCROLL]", "ScrollIntoView", "Scroll element into view"),
                 new ActionDialog.ActionOption("[ASSERT]", "Assert Visible", "Assert that element is visible"),
+                new ActionDialog.ActionOption("[TOOLTIP]", "Check Tooltip", "Assert element tooltip text"),
+                new ActionDialog.ActionOption("[REMOVE]", "Remove from DOM", "Remove element from DOM to clear the way"),
                 new ActionDialog.ActionOption("[WAIT]", "Wait", "Wait for element to be ready (no action)"),
                 new ActionDialog.ActionOption("[WAIT+CLICK]", "Wait & Click", "Wait for element then click")
             };
@@ -173,6 +175,14 @@ public class ElementSelectionManager {
                 break;
             case "Hover":
                 sb.append(".trigger('mouseover', ").append(opts).append(");");
+                break;
+            case "Check Tooltip":
+                String tooltipText = JOptionPane.showInputDialog("Enter expected tooltip text:");
+                if (tooltipText == null) return "";
+                sb.append(".should('have.attr', 'title', '").append(tooltipText.replace("'", "\\'")).append("');");
+                break;
+            case "Remove from DOM":
+                sb.append(".invoke('remove'); // Element removed from DOM");
                 break;
             case "Wait":
                 sb.append("; // Waiting for element to be ready");
