@@ -1,6 +1,7 @@
 package org.examfgdgfd.ui.sections;
 
 import org.examfgdgfd.ui.components.*;
+import org.examfgdgfd.util.PreferenceManager;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
