@@ -1,8 +1,13 @@
 package org.examfgdgfd;
 
+import org.examfgdgfd.config.AppConfig;
 import org.examfgdgfd.core.ElementSelectionManager;
+import org.examfgdgfd.error.ErrorHandler;
+import org.examfgdgfd.logging.AppLogger;
 import org.examfgdgfd.ui.components.*;
 import org.examfgdgfd.ui.sections.SidebarSection;
+import org.examfgdgfd.validation.InputValidator;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -89,18 +94,21 @@ public class GhostTesterUI extends JFrame {
     private void launchBrowser() {
         // Prevent multiple browser instances
         if (engine.isDriverReady()) {
-            JOptionPane.showMessageDialog(this, "[!] Browser already running", "Info", JOptionPane.INFORMATION_MESSAGE);
+            ErrorHandler.handleInfo(this, "Browser Status", "Browser already running");
             return;
         }
 
         String url = sidebar.getTargetUrl();
-        if (url.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "[!] Please enter a target URL", "Error", JOptionPane.ERROR_MESSAGE);
+
+        // Validate URL
+        if (!InputValidator.isValidUrl(url)) {
+            ErrorHandler.handleError(this, "Invalid URL", "Please enter a valid URL (e.g., https://example.com)");
             return;
         }
 
         sidebar.btnLaunch.setEnabled(false);
         sidebar.btnLaunch.setText("[...] LAUNCHING...");
+        AppLogger.info("Browser launch initiated: " + url);
 
         new Thread(() -> {
             try {
@@ -109,8 +117,8 @@ public class GhostTesterUI extends JFrame {
 
                 // Wait for page to load
                 int attempts = 0;
-                while (!engine.isDriverReady() && attempts < 30) {
-                    Thread.sleep(200);
+                while (!engine.isDriverReady() && attempts < AppConfig.BROWSER_LAUNCH_TIMEOUT * 5) {
+                    Thread.sleep(AppConfig.BROWSER_READY_CHECK_INTERVAL);
                     attempts++;
                 }
 
@@ -118,12 +126,15 @@ public class GhostTesterUI extends JFrame {
                     consolePanel.appendText("[+] Browser launched successfully!\n");
                     consolePanel.appendText("[+] Page loaded: " + engine.getCurrentUrl() + "\n");
                     consolePanel.appendText("[*] Ready to start SPY MODE\n");
+                    AppLogger.info("Browser ready at: " + engine.getCurrentUrl());
                     SwingUtilities.invokeLater(() -> sidebar.btnPlay.setEnabled(true));
                 } else {
                     consolePanel.appendText("[X] Browser launch timeout\n");
+                    AppLogger.warn("Browser launch timeout after " + AppConfig.BROWSER_LAUNCH_TIMEOUT + " seconds");
                 }
             } catch (Exception e) {
                 consolePanel.appendText("[X] Error: " + e.getMessage() + "\n");
+                AppLogger.error("Browser launch failed", e);
             } finally {
                 SwingUtilities.invokeLater(() -> {
                     sidebar.btnLaunch.setEnabled(true);
@@ -143,13 +154,14 @@ public class GhostTesterUI extends JFrame {
 
     private void startSpyMode() {
         if (!engine.isDriverReady()) {
-            JOptionPane.showMessageDialog(this, "[!] Browser not ready. Launch browser first.", "Error", JOptionPane.ERROR_MESSAGE);
+            ErrorHandler.handleError(this, "Browser Not Ready", "Launch browser first before starting SPY MODE");
             return;
         }
 
         engine.isMonitoring = true;
         sidebar.btnPlay.setText("[X] STOP SPY MODE");
         consolePanel.appendText("\n[*] SPY MODE ACTIVE - Click elements to capture them\n");
+        AppLogger.info("SPY MODE started");
 
         spyThread = new Thread(() -> {
             int captureCount = 0;
@@ -158,6 +170,7 @@ public class GhostTesterUI extends JFrame {
                 if (data != null) {
                     captureCount++;
                     String varName = "element_" + captureCount;
+                    AppLogger.debug("Element captured: " + varName);
 
                     SwingUtilities.invokeLater(() ->
                         selectionManager.handleElementSelection(
@@ -170,7 +183,7 @@ public class GhostTesterUI extends JFrame {
                     );
                 }
                 try {
-                    Thread.sleep(300);
+                    Thread.sleep(AppConfig.SPY_ELEMENT_CHECK_INTERVAL);
                 } catch (InterruptedException e) {
                     break;
                 }
@@ -191,8 +204,15 @@ public class GhostTesterUI extends JFrame {
 
     @Override
     public void dispose() {
-        if (engine != null) {
-            engine.closeDriver();
+        try {
+            if (engine != null) {
+                AppLogger.info("Closing browser driver");
+                engine.closeDriver();
+            }
+            AppLogger.info("Application shutting down");
+            AppLogger.close();
+        } catch (Exception e) {
+            System.err.println("Error during shutdown: " + e.getMessage());
         }
         super.dispose();
     }

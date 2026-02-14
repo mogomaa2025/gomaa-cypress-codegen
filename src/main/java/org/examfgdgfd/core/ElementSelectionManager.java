@@ -113,21 +113,48 @@ public class ElementSelectionManager {
         String text = (String) data.get("text");
         String tag = (String) data.get("tag");
         String className = (String) data.get("class");
+        String type = (String) data.get("type");
 
+        // cy.get() with ID
         if (id != null && !id.isEmpty()) {
-            locs.add("cy.get('#" + id + "')");
+            locs.add("cy.get('#" + id + "')  // ID selector");
         }
 
-        if (text != null && !text.isEmpty() && text.length() < 50) {
-            locs.add("cy.contains('" + text.replace("'", "\\'") + "')");
-        }
-
-        locs.add("cy.get('" + tag + "')");
-
+        // cy.get() with class
         if (className != null && !className.isEmpty()) {
             String[] classes = className.split(" ");
             if (classes.length > 0) {
-                locs.add("cy.get('." + classes[0] + "')");
+                locs.add("cy.get('." + classes[0] + "')  // Class selector");
+            }
+        }
+
+        // cy.get() with tag
+        if (tag != null && !tag.isEmpty()) {
+            locs.add("cy.get('" + tag + "')  // Tag selector");
+        }
+
+        // cy.get() with attribute selector
+        if (type != null && !type.isEmpty()) {
+            locs.add("cy.get('[type=\"" + type + "\"]')  // Type attribute");
+        }
+
+        // cy.contains() with text - Find by text content
+        if (text != null && !text.isEmpty() && text.length() < 50) {
+            String cleanText = text.replace("'", "\\'");
+            locs.add("cy.contains('" + cleanText + "')  // Find by text");
+        }
+
+        // cy.get() + contains() - Tag + text combination
+        if (tag != null && !tag.isEmpty() && text != null && !text.isEmpty() && text.length() < 50) {
+            String cleanText = text.replace("'", "\\'");
+            locs.add("cy.get('" + tag + "').contains('" + cleanText + "')  // Tag with text");
+        }
+
+        // cy.find() with class inside parent
+        if (className != null && !className.isEmpty() && tag != null && !tag.isEmpty()) {
+            String[] classes = className.split(" ");
+            if (classes.length > 0) {
+                locs.add("cy.get('" + tag + "').find('." + classes[0] + "')  // Find by class");
             }
         }
 
