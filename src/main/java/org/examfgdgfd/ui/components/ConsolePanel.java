@@ -22,7 +22,7 @@ public class ConsolePanel extends JPanel {
     }
 
     private void initConsole() {
-        JLabel consoleTitle = new JLabel("💻 OUTPUT CONSOLE");
+        JLabel consoleTitle = new JLabel("[*] OUTPUT CONSOLE");
         consoleTitle.setFont(new Font("Segoe UI", Font.BOLD, 12));
         consoleTitle.setForeground(new Color(241, 245, 249));
         add(consoleTitle, BorderLayout.NORTH);

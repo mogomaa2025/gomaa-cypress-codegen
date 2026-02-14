@@ -42,7 +42,7 @@ public class ElementSelectionManager {
             locatorDialog.setVisible(true);
 
             if (!locatorDialog.isConfirmed()) {
-                appendConsole("⚠ Locator selection cancelled\n");
+                appendConsole("[!] Locator selection cancelled\n");
                 return;
             }
 
@@ -65,7 +65,7 @@ public class ElementSelectionManager {
             actionDialog.setVisible(true);
 
             if (!actionDialog.isConfirmed()) {
-                appendConsole("⚠ Action selection cancelled\n");
+                appendConsole("[!] Action selection cancelled\n");
                 return;
             }
 
@@ -84,7 +84,7 @@ public class ElementSelectionManager {
             );
 
             if (selectedWait == null) {
-                appendConsole("⚠ Wait state selection cancelled\n");
+                appendConsole("[!] Wait state selection cancelled\n");
                 return;
             }
 
@@ -96,12 +96,12 @@ public class ElementSelectionManager {
             fileManager.updateFiles(projectPath, folderName, varName, pomLine, specLine, targetUrl);
 
             // Display results
-            appendConsole("✓ [POM] " + pomLine + "\n");
-            appendConsole("✓ [SPEC] " + specLine + "\n");
-            appendConsole("═══════════════════════════════════════════════════\n");
+            appendConsole("[+] [POM] " + pomLine + "\n");
+            appendConsole("[+] [SPEC] " + specLine + "\n");
+            appendConsole("=====================================================\n");
 
         } catch (Exception e) {
-            appendConsole("❌ Error: " + e.getMessage() + "\n");
+            appendConsole("[X] Error: " + e.getMessage() + "\n");
             e.printStackTrace();
         }
     }
@@ -143,14 +143,14 @@ public class ElementSelectionManager {
 
         boolean force = JOptionPane.showConfirmDialog(
             parentFrame,
-            "💥 Force Action? (Override waiting conditions)",
+            "Force Action? (Override waiting conditions)",
             "Options",
             JOptionPane.YES_NO_OPTION
         ) == JOptionPane.YES_OPTION;
 
         boolean multi = JOptionPane.showConfirmDialog(
             parentFrame,
-            "🔀 Multiple Elements?",
+            "Multiple Elements?",
             "Options",
             JOptionPane.YES_NO_OPTION
         ) == JOptionPane.YES_OPTION;

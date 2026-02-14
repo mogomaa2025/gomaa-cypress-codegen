@@ -23,6 +23,8 @@ public class SidebarSection extends JPanel {
     private static final Color BG_DARK = new Color(15, 23, 42);
     private static final Color TEXT_PRIMARY = new Color(241, 245, 249);
 
+    private volatile boolean fileChooserOpen = false;  // Prevent re-triggering
+
     public SidebarSection() {
         setPreferredSize(new Dimension(380, 0));
         setBackground(BG_DARK);
@@ -34,21 +36,21 @@ public class SidebarSection extends JPanel {
 
     private void initComponents() {
         // Card 1: Project Path
-        GlassmorphicCard card1 = new GlassmorphicCard("📁 PROJECT PATH", TEXT_PRIMARY);
+        GlassmorphicCard card1 = new GlassmorphicCard("[F] PROJECT PATH", TEXT_PRIMARY);
         pathInput = new ModernTextField();
-        btnBrowse = new ModernButton("📂 Browse Folder", PRIMARY, ACCENT);
+        btnBrowse = new ModernButton("[>] Browse Folder", PRIMARY, ACCENT);
         card1.add(pathInput);
         card1.add(Box.createRigidArea(new Dimension(0, 8)));
         card1.add(btnBrowse);
 
         // Card 2: Target URL
-        GlassmorphicCard card2 = new GlassmorphicCard("🌐 TARGET URL", TEXT_PRIMARY);
+        GlassmorphicCard card2 = new GlassmorphicCard("[W] TARGET URL", TEXT_PRIMARY);
         urlInput = new ModernTextField();
         urlInput.setText("https://dev.zeustra.com");
         card2.add(urlInput);
 
         // Card 3: Folder Name
-        GlassmorphicCard card3 = new GlassmorphicCard("📂 FOLDER NAME", TEXT_PRIMARY);
+        GlassmorphicCard card3 = new GlassmorphicCard("[D] FOLDER NAME", TEXT_PRIMARY);
         folderInput = new ModernTextField();
         folderInput.setText("My_Automation_Folder");
         card3.add(folderInput);
@@ -62,8 +64,8 @@ public class SidebarSection extends JPanel {
         add(Box.createRigidArea(new Dimension(0, 20)));
 
         // Action Buttons
-        btnLaunch = new ModernButton("🚀 LAUNCH BROWSER", ACCENT, SECONDARY);
-        btnPlay = new ModernButton("🟢 START SPY MODE", PRIMARY, ACCENT);
+        btnLaunch = new ModernButton("[*] LAUNCH BROWSER", ACCENT, SECONDARY);
+        btnPlay = new ModernButton("[+] START SPY MODE", PRIMARY, ACCENT);
 
         add(btnLaunch);
         add(Box.createRigidArea(new Dimension(0, 10)));
@@ -75,11 +77,18 @@ public class SidebarSection extends JPanel {
             JFileChooser fc = new JFileChooser();
             fc.setCurrentDirectory(new File(PreferenceManager.getLastOpenedDirectory()));
             fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+            int result = fc.showOpenDialog(this);
+
+            if (result == JFileChooser.APPROVE_OPTION) {
                 String selectedPath = fc.getSelectedFile().getAbsolutePath();
                 pathInput.setText(selectedPath);
                 PreferenceManager.setLastOpenedDirectory(selectedPath);
             }
+
+            // Properly dispose of file chooser
+            fc.cancelSelection();
+            fc = null;
         });
     }
 

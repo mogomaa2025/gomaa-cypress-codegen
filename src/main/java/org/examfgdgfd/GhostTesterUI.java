@@ -45,7 +45,7 @@ public class GhostTesterUI extends JFrame {
     }
 
     private void setupWindow() {
-        setTitle("✨ Ghost Tester Ultra Pro - 2026");
+        setTitle("Ghost Tester Ultra Pro - 2026");
         setSize(1400, 850);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -57,7 +57,7 @@ public class GhostTesterUI extends JFrame {
     private void setupUI() {
         // Header
         header = new GradientHeader(PRIMARY, SECONDARY);
-        header.setHeaderContent("✨ Ghost Tester Ultra Pro - 2026", "🎯 Cypress Test Generation Engine");
+        header.setHeaderContent("Ghost Tester Ultra Pro - 2026", "Cypress Test Generation Engine");
         add(header, BorderLayout.NORTH);
 
         // Sidebar
@@ -72,13 +72,6 @@ public class GhostTesterUI extends JFrame {
     }
 
     private void setupEventHandlers() {
-        sidebar.btnBrowse.addActionListener(e -> {
-            JFileChooser fc = new JFileChooser();
-            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                sidebar.setProjectPath(fc.getSelectedFile().getAbsolutePath());
-            }
-        });
 
         sidebar.btnLaunch.addActionListener(e -> launchBrowser());
         sidebar.btnPlay.addActionListener(e -> toggleSpyMode());
@@ -94,18 +87,24 @@ public class GhostTesterUI extends JFrame {
     }
 
     private void launchBrowser() {
+        // Prevent multiple browser instances
+        if (engine.isDriverReady()) {
+            JOptionPane.showMessageDialog(this, "[!] Browser already running", "Info", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
         String url = sidebar.getTargetUrl();
         if (url.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "❌ Please enter a target URL", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "[!] Please enter a target URL", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         sidebar.btnLaunch.setEnabled(false);
-        sidebar.btnLaunch.setText("🔄 LAUNCHING...");
+        sidebar.btnLaunch.setText("[...] LAUNCHING...");
 
         new Thread(() -> {
             try {
-                consolePanel.appendText("🚀 Launching browser with URL: " + url + "\n");
+                consolePanel.appendText("[+] Launching browser with URL: " + url + "\n");
                 engine.launch(url);
 
                 // Wait for page to load
@@ -116,19 +115,19 @@ public class GhostTesterUI extends JFrame {
                 }
 
                 if (engine.isDriverReady()) {
-                    consolePanel.appendText("✓ Browser launched successfully!\n");
-                    consolePanel.appendText("✓ Page loaded: " + engine.getCurrentUrl() + "\n");
-                    consolePanel.appendText("💡 Ready to start SPY MODE\n");
+                    consolePanel.appendText("[+] Browser launched successfully!\n");
+                    consolePanel.appendText("[+] Page loaded: " + engine.getCurrentUrl() + "\n");
+                    consolePanel.appendText("[*] Ready to start SPY MODE\n");
                     SwingUtilities.invokeLater(() -> sidebar.btnPlay.setEnabled(true));
                 } else {
-                    consolePanel.appendText("❌ Browser launch timeout\n");
+                    consolePanel.appendText("[X] Browser launch timeout\n");
                 }
             } catch (Exception e) {
-                consolePanel.appendText("❌ Error: " + e.getMessage() + "\n");
+                consolePanel.appendText("[X] Error: " + e.getMessage() + "\n");
             } finally {
                 SwingUtilities.invokeLater(() -> {
                     sidebar.btnLaunch.setEnabled(true);
-                    sidebar.btnLaunch.setText("🚀 LAUNCH BROWSER");
+                    sidebar.btnLaunch.setText("[*] LAUNCH BROWSER");
                 });
             }
         }).start();
@@ -144,13 +143,13 @@ public class GhostTesterUI extends JFrame {
 
     private void startSpyMode() {
         if (!engine.isDriverReady()) {
-            JOptionPane.showMessageDialog(this, "❌ Browser not ready. Launch browser first.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "[!] Browser not ready. Launch browser first.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         engine.isMonitoring = true;
-        sidebar.btnPlay.setText("🛑 STOP SPY MODE");
-        consolePanel.appendText("\n🕵️ SPY MODE ACTIVE - Click elements to capture them\n");
+        sidebar.btnPlay.setText("[X] STOP SPY MODE");
+        consolePanel.appendText("\n[*] SPY MODE ACTIVE - Click elements to capture them\n");
 
         spyThread = new Thread(() -> {
             int captureCount = 0;
@@ -183,11 +182,11 @@ public class GhostTesterUI extends JFrame {
 
     private void stopSpyMode() {
         engine.isMonitoring = false;
-        sidebar.btnPlay.setText("🟢 START SPY MODE");
+        sidebar.btnPlay.setText("[+] START SPY MODE");
         if (spyThread != null) {
             spyThread.interrupt();
         }
-        consolePanel.appendText("🛑 SPY MODE STOPPED\n");
+        consolePanel.appendText("[X] SPY MODE STOPPED\n");
     }
 
     @Override

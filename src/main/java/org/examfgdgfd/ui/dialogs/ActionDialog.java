@@ -33,6 +33,8 @@ public class ActionDialog extends JDialog {
         setSize(450, 320);
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setAlwaysOnTop(true);
+        setAutoRequestFocus(true);
         initUI(actions);
     }
 
